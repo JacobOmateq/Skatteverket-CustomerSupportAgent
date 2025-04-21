@@ -31,10 +31,10 @@ Implement a multilingual AI Voicebot as the first line of support for Skatteverk
 - **Fallback Mechanism:** Design a robust handoff process to ensure no caller is left unresolved due to system limitations.
 
 ## Tech Stack
-- **ElevenLabs:** For Voice-to-Voice agent capabilities.
+- **ElevenLabs:** For Voice-to-Voice agent capabilities. RAG for skatteverkets related information retrieval and for answering questions from users.
 - **Twilio:** For receiving and managing phone calls, and integration with ElevenLabs.
 - **React:** For the human agent interface.
-- **RAG (Retrieval-Augmented Generation):** For answering questions with public information from Skatteverket sites.
+- **Kong:** For API gateway management to handle secure integrations with Twilio and ElevenLabs.
 
 For more information on the ElevenLabs and Twilio integration, see the [official documentation](https://elevenlabs.io/docs/conversational-ai/guides/twilio/native-integration).
 

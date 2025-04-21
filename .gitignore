@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+out/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Twilio credentials and secrets
+twilio.json
+.twilio-credentials
+
+# ElevenLabs API keys and configurations
+elevenlabs.json
+.elevenlabs-credentials
+
+# Kong Gateway configurations
+kong.yml
+kong.conf
+
+# React build artifacts
+/build
+.cache/
+public/dist/
+
+# Temporary files
+*.tmp
+temp/
+.cache/
+
+# RAG and ML model files
+models/
+embeddings/
+vector_store/
+
+# Documentation artifacts
+docs/_build/
+api-docs/
+
+# Client build artifacts
+client/node_modules/
+client/dist/
+client/build/
+client/node_modules
