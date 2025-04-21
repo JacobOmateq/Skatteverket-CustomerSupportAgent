@@ -2,3 +2,5 @@ polytope.yml
 
 # Python
 __pycache__/
+api/uv.lock
+frontend/yarn.lock

@@ -7,7 +7,7 @@
 2. Copy the `polytope.yml.template` file to a `polytope.yml` file and fill in the required fields.
     - `kong` module: `KONG_CLUSTER_CERT`, `KONG_CLUSTER_CERT_KEY`
     - `api` module: `COUCHBASE_URL` (Public Connection String, get from the Connect tab of your cluster), `COUCHBASE_USERNAME` (Cluster Access Name, not your username/email), `COUCHBASE_PASSWORD` (Cluster Access Name, not your account password).
-3. Run `pt stack run` to start the stack.
+3. Run `pt run stack` to start the stack.
 4. Visit [localhost:8000](http://localhost:8000). You should see a simple chat app with some example queries. Clicking an example or chatting with the bot should work, albeit buggy.
 
 
