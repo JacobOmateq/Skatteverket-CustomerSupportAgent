@@ -1,5 +1,7 @@
 # AI Voicebot for Skatteverket Customer Support
 
+
+
 ## Overview
 Skatteverket's customer support currently experiences long queue times for phone inquiries, particularly affecting elderly individuals, people with disabilities, and those seeking quick answers. The existing process involves slow, manual options for identifying user intent and routing calls to the appropriate department, leading to frustration.
 
@@ -47,6 +49,9 @@ For more information on the ElevenLabs and Twilio integration, see the [official
    - A summary of the interaction
    - The user's final intent
    - The agent interacts with the customer via a React application interface (with possible Twilio integration).
+
+### System Flow Diagram
+![Skatteverket Customer Support Flow](media/Skatteverket-Flowchart.png)
 
 ## Conclusion
 The AI Voicebot for Skatteverket will modernize customer support by providing a fast, multilingual, and accessible first line of assistance. By resolving simple queries and efficiently routing complex ones, it will reduce wait times, break down language barriers, and enhance the overall user experience. 
