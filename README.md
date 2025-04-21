@@ -50,3 +50,11 @@ For more information on the ElevenLabs and Twilio integration, see the [official
 
 ## Conclusion
 The AI Voicebot for Skatteverket will modernize customer support by providing a fast, multilingual, and accessible first line of assistance. By resolving simple queries and efficiently routing complex ones, it will reduce wait times, break down language barriers, and enhance the overall user experience. 
+
+# Original template README:
+
+> # Cillers System Demo Template For Kong AI Gateway Hackathon at AWS Sweden HQ, April 23, 2025
+> \
+> Documentation: https://docs.cillers.com/cillers-system-demo-templates/kong-ai-+-gateway-hackathon
+> \
+> Author: André Eriksson and Peder Linder

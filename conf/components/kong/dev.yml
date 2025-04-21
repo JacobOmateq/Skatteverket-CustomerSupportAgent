@@ -1,0 +1,51 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+- name: frontend
+  url: http://frontend:3002
+  routes:
+  - name: frontend-route
+    strip_path: false
+    paths:
+    - /
+  plugins:
+  - name: post-function
+    config:
+      header_filter:
+        - |
+          local status = kong.response.get_status()
+          if status == nil or status == 502 or status == 503 then
+            local status_messages = {
+                [502] = "the frontend is starting",
+                [503] = "the frontend isn't running yet",
+            }
+            message = status_messages[status] or ("status code " .. (status or 'unknown'))
+            kong.response.exit(503, '<body style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; background: #1d232a"> <h1 style="color: #a6adbb">Waiting for the frontend server to start - ' .. message .. '...</h1> </body>', {["Content-Type"] = "text/html"})
+          end
+
+- name: api
+  url: http://api:3001
+  routes:
+  - name: api-route
+    strip_path: false
+    paths:
+    - /api
+    - /docs
+    - /redoc
+    - /openapi.json
+  plugins:
+  - name: post-function
+    config:
+      header_filter:
+        - |
+          local status = kong.service.response.get_status()
+          if status == nil or status == 502 or status == 503 then
+            local status_messages = {
+                [502] = "the API server is starting",
+                [503] = "the API server isn't running yet",
+            }
+            message = status_messages[status] or ("status code " .. (status or 'unknown'))
+            kong.response.exit(503, '{"message": "Waiting for the API server to start - ' .. message .. '..."}', {["Content-Type"] = "application/json"})
+          end
+
