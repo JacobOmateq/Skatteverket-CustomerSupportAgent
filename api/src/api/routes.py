@@ -450,6 +450,9 @@ async def add_chat_message(
         analysis = process_message(opper, formatted_messages)
         response = bake_response(opper, formatted_messages, analysis)
 
+    # Update chat metadata with the latest intent
+    db.update_chat_metadata(chat_id, {"intent": analysis["intent"]})
+
     # Add assistant response to database
     (response_id, response_ts) = db.add_message(chat_id, "assistant", response)
 

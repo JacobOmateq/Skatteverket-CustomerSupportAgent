@@ -211,6 +211,38 @@ class CouchbaseChatClient:
             logger.exception("Failed to add message.")
             raise
 
+    def update_chat_metadata(self, chat_id: str, metadata: Dict[str, Any]) -> bool:
+        """
+        Update metadata for an existing chat session.
+
+        Args:
+            chat_id: The UUID of the chat session
+            metadata: The new metadata for the chat session
+
+        Returns:
+            True if the metadata was updated, False otherwise
+        """
+        if not self.chats:
+            self.init()
+
+        try:
+            chat = self.get_chat(chat_id)
+            if not chat:
+                return False
+            
+            # Merge existing metadata with new metadata
+            current_metadata = chat.get("metadata", {})
+            metadata = {**current_metadata, **metadata}
+
+            # Update metadata
+            chat["metadata"] = metadata
+            self.chats.upsert(chat_id, chat)
+            logger.info(f"Updated metadata for chat {chat_id}")
+            return True
+        except Exception:
+            logger.exception("Failed to update chat metadata.")
+            raise
+
     def get_chat(self, chat_id: str) -> Optional[Dict[str, Any]]:
         """
         Get a chat session by ID.
