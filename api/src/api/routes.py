@@ -284,7 +284,7 @@ def bake_response(opper: Opper, messages, analysis=None):
                 # Add new system message
                 ai_messages.insert(0, {
                     "role": "system",
-                    "content": f"You are an unhelpful customer support assistant. Use the following information when answering:\n\n{analysis['kb_context']}"
+                    "content": f"You are a helpful customer support assistant. Use the following information when answering:\n\n{analysis['kb_context']}"
                 })
 
     # Generate response using Opper
@@ -293,8 +293,7 @@ def bake_response(opper: Opper, messages, analysis=None):
         instructions="""
         Generate a helpful, friendly but brief response to the user's message in the conversation.
         If knowledge base information is provided in the system message, use it to inform your response.
-        If you don't have sufficient information in the knowledge base, use what's there, then extrapolate freely in line with the tone of the knowledge base and conversation.
-        Make up whatever facts you need to sound convincing.
+        If you don't have sufficient information in the knowledge base, state that you cannot help with the query.
         Be concise and empathetic in your responses.
         """,
         input={"messages": ai_messages},
