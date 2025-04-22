@@ -9,6 +9,7 @@ from couchbase.options import ClusterOptions, WaitUntilReadyOptions
 from couchbase.exceptions import RequestCanceledException, AuthenticationException
 from couchbase.diagnostics import ServiceType
 
+
 class ControllerCluster:
     def __init__(self, host, username, password, tls, type):
         self.host = host
@@ -25,40 +26,44 @@ class ControllerCluster:
         protocol = "https" if self.tls else "http"
         port = "18091" if self.tls else "8091"
         return {
-            'url': f"{protocol}://{self.host}:{port}/clusterInit",
-            'data': {
-                'username': self.username,
-                'password': self.password,
-                'services': 'kv,n1ql,index,fts,eventing',
-                'hostname': '127.0.0.1',
-                'memoryQuota': '256',
-                'sendStats': 'false',
-                'clusterName': 'cillers',
-                'setDefaultMemQuotas': 'true',
-                'indexerStorageMode': 'plasma',
-                'port': 'SAME'
-            }
+            "url": f"{protocol}://{self.host}:{port}/clusterInit",
+            "data": {
+                "username": self.username,
+                "password": self.password,
+                "services": "kv,n1ql,index,fts,eventing",
+                "hostname": "127.0.0.1",
+                "memoryQuota": "256",
+                "sendStats": "false",
+                "clusterName": "cillers",
+                "setDefaultMemQuotas": "true",
+                "indexerStorageMode": "plasma",
+                "port": "SAME",
+            },
         }
 
     def ensure_initialized(self):
-        encoded_data = urllib.parse.urlencode(self.params_cluster_init()['data']).encode()
+        encoded_data = urllib.parse.urlencode(
+            self.params_cluster_init()["data"]
+        ).encode()
         request = urllib.request.Request(
-            self.params_cluster_init()['url'],
-            data=encoded_data,
-            method='POST')
+            self.params_cluster_init()["url"], data=encoded_data, method="POST"
+        )
         max_retries = 100
         for attempt in range(max_retries):
             try:
-                with urllib.request.urlopen(request, timeout=10*60) as response:
+                with urllib.request.urlopen(request, timeout=10 * 60) as response:
                     response.read().decode()
                     print("Cluster initialization successful.")
                 return
             except Exception as e:
                 if attempt == max_retries - 1:
-                    print('Timeout: Waiting until cluster is started')
+                    print("Timeout: Waiting until cluster is started")
                     raise e
                 error_message = str(e)
-                if 'already initialized' in error_message or 'Unauthorized' in error_message:
+                if (
+                    "already initialized" in error_message
+                    or "Unauthorized" in error_message
+                ):
                     print("Cluster already initialized.")
                     return
                 print("Waiting until cluster is started ... ")
@@ -72,9 +77,12 @@ class ControllerCluster:
             cluster_options.verify_credentials = True
         cluster = Cluster(self.get_connection_string(), cluster_options)
         wait_options = WaitUntilReadyOptions(
-                service_types=[ServiceType.KeyValue,
-                               ServiceType.Query,
-                               ServiceType.Management])
+            service_types=[
+                ServiceType.KeyValue,
+                ServiceType.Query,
+                ServiceType.Management,
+            ]
+        )
         cluster.wait_until_ready(timedelta(seconds=300), wait_options)
         return cluster
 
@@ -85,9 +93,11 @@ class ControllerCluster:
             except (RequestCanceledException, AuthenticationException) as e:
                 if attempt == max_retries - 1:
                     if isinstance(e, RequestCanceledException):
-                        print('Timeout: Connecting to cluster.')
+                        print("Timeout: Connecting to cluster.")
                     elif isinstance(e, AuthenticationException):
-                        print('Authentication failed: Cluster might not be fully initialized.')
+                        print(
+                            "Authentication failed: Cluster might not be fully initialized."
+                        )
                     raise e
 
                 if isinstance(e, RequestCanceledException):

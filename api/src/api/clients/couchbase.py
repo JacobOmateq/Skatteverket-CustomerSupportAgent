@@ -10,6 +10,7 @@ from ..utils import log
 
 logger = log.get_logger(__name__)
 
+
 class CouchbaseChatClient:
     def __init__(
         self,
@@ -19,7 +20,7 @@ class CouchbaseChatClient:
         bucket_name: str = None,
         scope: str = "_default",
         chats_coll: str = "chats",
-        messages_coll: str = "chat_messages"
+        messages_coll: str = "chat_messages",
     ):
         self.url = url
         self.username = username
@@ -71,9 +72,7 @@ class CouchbaseChatClient:
                     if "already exists" in str(e):
                         pass
                     else:
-                        logger.warning(
-                            f"Error creating collection {coll}: {str(e)}"
-                        )
+                        logger.warning(f"Error creating collection {coll}: {str(e)}")
 
             self.chats = self.scope.collection(self.chats_coll)
             self.messages = self.scope.collection(self.messages_coll)
@@ -83,7 +82,9 @@ class CouchbaseChatClient:
             logger.error(f"Error initializing collections: {str(e)}")
             raise
 
-    def await_up(self, max_retries: int = 30, initial_delay: float = 1.0, max_delay: float = 10.0) -> None:
+    def await_up(
+        self, max_retries: int = 30, initial_delay: float = 1.0, max_delay: float = 10.0
+    ) -> None:
         """
         Wait until the Couchbase query service is available by running a simple query in a loop.
 
@@ -127,7 +128,9 @@ class CouchbaseChatClient:
                     raise
 
         # If we've exhausted all retries
-        raise Exception(f"Couchbase query service not available after {max_retries} attempts")
+        raise Exception(
+            f"Couchbase query service not available after {max_retries} attempts"
+        )
 
     def create_chat(self, metadata: Dict[str, Any] = None) -> str:
         """
@@ -148,7 +151,7 @@ class CouchbaseChatClient:
             "id": chat_id,
             "created_at": now,
             "updated_at": now,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         try:
@@ -160,11 +163,7 @@ class CouchbaseChatClient:
             raise
 
     def add_message(
-        self,
-        chat_id: str,
-        role: str,
-        content: str,
-        metadata: Dict[str, Any] = None
+        self, chat_id: str, role: str, content: str, metadata: Dict[str, Any] = None
     ) -> Tuple[int, str]:
         """
         Add a message to an existing chat session.
@@ -201,7 +200,7 @@ class CouchbaseChatClient:
                 "role": role,
                 "content": content,
                 "created_at": now.isoformat(),
-                "metadata": metadata or {}
+                "metadata": metadata or {},
             }
 
             self.messages.upsert(message_key, message_doc)
@@ -228,7 +227,7 @@ class CouchbaseChatClient:
         try:
             result = self.chats.get(chat_id)
 
-            if not result or not hasattr(result, 'value') or not result.value:
+            if not result or not hasattr(result, "value") or not result.value:
                 return None
 
             return result.value

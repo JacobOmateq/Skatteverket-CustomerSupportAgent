@@ -2,6 +2,7 @@ import time
 from couchbase.management.buckets import CreateBucketSettings, BucketType
 from couchbase.exceptions import BucketDoesNotExistException
 
+
 class ControllerBucket:
     def __init__(self, controller_cluster, cluster):
         self.controller_cluster = controller_cluster
@@ -15,13 +16,15 @@ class ControllerBucket:
             print(f"Bucket '{bucket_name}' already exists.")
         except BucketDoesNotExistException:
             if self.controller_cluster.type == "capella":
-                raise Exception(f"No bucket '{bucket_name}' exists in Capella cluster. When using  bucket must be created manually using the Capella UI.")
+                raise Exception(
+                    f"No bucket '{bucket_name}' exists in Capella cluster. When using  bucket must be created manually using the Capella UI."
+                )
             try:
                 bucket_manager.create_bucket(
                     CreateBucketSettings(
                         name=bucket_name,
                         bucket_type=BucketType.COUCHBASE,
-                        ram_quota_mb=ram_quota_mb
+                        ram_quota_mb=ram_quota_mb,
                     )
                 )
                 print(f"Bucket '{bucket_name}' created successfully.")

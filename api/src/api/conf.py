@@ -7,11 +7,13 @@ logger = log.get_logger(__name__)
 
 #### Types ####
 
+
 class HttpServerConf(BaseModel):
     host: str
     port: int
     debug: bool
     autoreload: bool
+
 
 class CouchbaseConf(BaseModel):
     url: str
@@ -19,6 +21,7 @@ class CouchbaseConf(BaseModel):
     username: str
     password: str
     scope: str = "_default"
+
 
 #### Env Vars ####
 
@@ -52,13 +55,14 @@ OPPER_API_KEY = EnvVarSpec(id="OPPER_API_KEY", is_secret=True)
 
 ## Couchbase ##
 
-COUCHBASE_BUCKET   = EnvVarSpec(id="COUCHBASE_BUCKET")
+COUCHBASE_BUCKET = EnvVarSpec(id="COUCHBASE_BUCKET")
 COUCHBASE_PASSWORD = EnvVarSpec(id="COUCHBASE_PASSWORD", is_secret=True)
-COUCHBASE_SCOPE    = EnvVarSpec(id="COUCHBASE_SCOPE", default="_default")
-COUCHBASE_URL      = EnvVarSpec(id="COUCHBASE_URL")
+COUCHBASE_SCOPE = EnvVarSpec(id="COUCHBASE_SCOPE", default="_default")
+COUCHBASE_URL = EnvVarSpec(id="COUCHBASE_URL")
 COUCHBASE_USERNAME = EnvVarSpec(id="COUCHBASE_USERNAME")
 
 #### Validation ####
+
 
 def validate() -> bool:
     return env.validate(
@@ -76,10 +80,13 @@ def validate() -> bool:
         ]
     )
 
+
 #### Getters ####
+
 
 def get_log_level() -> str:
     return env.parse(LOG_LEVEL)
+
 
 def get_http_conf() -> HttpServerConf:
     return HttpServerConf(
@@ -89,6 +96,7 @@ def get_http_conf() -> HttpServerConf:
         autoreload=env.parse(HTTP_AUTORELOAD),
     )
 
+
 def get_couchbase_conf() -> CouchbaseConf:
     return CouchbaseConf(
         url=env.parse(COUCHBASE_URL),
@@ -96,6 +104,7 @@ def get_couchbase_conf() -> CouchbaseConf:
         username=env.parse(COUCHBASE_USERNAME),
         password=env.parse(COUCHBASE_PASSWORD),
     )
+
 
 def get_opper_api_key() -> str:
     return env.parse(OPPER_API_KEY)
