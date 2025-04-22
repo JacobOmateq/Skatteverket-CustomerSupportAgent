@@ -445,4 +445,4 @@ async def delete_chat(
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete chat")
 
-    return MessageResponse(message=f"Chat {chat_id} deleted successfully")
+    return MessageResponse(message=f"Chat {chat_id} deleted successfully")ß

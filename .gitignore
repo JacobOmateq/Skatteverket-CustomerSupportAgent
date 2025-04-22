@@ -4,3 +4,5 @@ polytope.yml
 __pycache__/
 api/uv.lock
 frontend/yarn.lock
+.DS_Store
+.gitignore
