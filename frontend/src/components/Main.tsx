@@ -1,40 +1,50 @@
 import React from 'react';
-import { Route, Routes, Link } from 'react-router-dom';
-import ChatView from './ChatView';
+
+// Placeholder components - these will be implemented later
+const AgentStatus: React.FC = () => (
+  <div className="bg-gray-200 p-4">Agent Status: Available</div>
+);
+
+const CallControls: React.FC = () => (
+  <div className="bg-gray-300 p-4 flex space-x-2">
+    <button className="btn">Answer</button>
+    <button className="btn">Hold</button>
+    <button className="btn">Mute</button>
+    <button className="btn">Transfer</button>
+    <button className="btn btn-error">Hang Up</button>
+  </div>
+);
+
+const CallerView: React.FC = () => (
+  <div className="flex-1 p-4 bg-white">
+    <h2>Caller Information / Interaction Area</h2>
+    {/* Content related to the ongoing call will go here */}
+  </div>
+);
 
 const Main: React.FC = () => {
   return (
-    <main className="min-h-screen flex flex-col">
-      <header className="bg-primary text-primary-content p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div>
-            <Link to="/" className="cursor-pointer">
-              <h1 className="text-2xl font-bold">Customer Support AI Assistant</h1>
-              <p className="opacity-80">Get support with knowledge-powered AI assistance</p>
-            </Link>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Header section - can include agent info, status */}
+      <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold">Support Agent Console</h1>
+        <AgentStatus />
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <Routes>
-          <Route path="/" element={<ChatView />} />
-          <Route path="/chat/:chatId" element={<ChatView />} />
-        </Routes>
+      {/* Main content area */} 
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Call Controls - Typically at the top or bottom */}
+        <CallControls />
+
+        {/* Main Interaction Area - Caller Info, Scripts, Knowledge Base etc. */}
+        <CallerView />
       </div>
 
-      <footer className="bg-neutral text-neutral-content p-4 text-center text-sm">
-        <p>Hackathon Challenge: AI-powered Customer Support</p>
-        <div className="flex items-center justify-center mt-2 space-x-2">
-          <span className="text-sm">Powered by</span>
-          <a href="https://www.polytope.com/" className="font-bold text-transparent bg-clip-text hover:opacity-90 transition-opacity" style={{ background: "linear-gradient(to right, #ffa683, #ff76c2)", WebkitBackgroundClip: "text" }}>
-            POLYTOPE
-          </a>
-          <span className="text-sm">and</span>
-          <a style={{ color: "#fff" }} href="https://www.opper.ai/" className="text-sm font-medium hover:underline">Opper</a>
-        </div>
+      {/* Footer could be used for system messages or quick links */}
+      <footer className="bg-gray-700 text-gray-300 p-2 text-center text-xs">
+        Call Center Interface v0.1
       </footer>
-    </main>
+    </div>
   );
 }
 
