@@ -1,41 +1,98 @@
-import React from 'react';
-import { Route, Routes, Link } from 'react-router-dom';
-import ChatView from './ChatView';
+import { useEffect, useState } from 'react';
+import ChatTranscript from './ChatTranscript';
+import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaPause, FaShareSquare, FaCircle } from 'react-icons/fa';
+import ToastNotification from './ToastNotification';
+import AgentStatus from './AgentStatus';
+import SideBar from './SideBar';
+import CallTimer from './CallTimer';
 
-const Main: React.FC = () => {
-  return (
-    <main className="min-h-screen flex flex-col">
-      <header className="bg-primary text-primary-content p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div>
-            <Link to="/" className="cursor-pointer">
-              <h1 className="text-2xl font-bold">Customer Support AI Assistant</h1>
-              <p className="opacity-80">Get support with knowledge-powered AI assistance</p>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex-1 flex overflow-hidden">
-        <Routes>
-          <Route path="/" element={<ChatView />} />
-          <Route path="/chat/:chatId" element={<ChatView />} />
-        </Routes>
-      </div>
-
-      <footer className="bg-neutral text-neutral-content p-4 text-center text-sm">
-        <p>Hackathon Challenge: AI-powered Customer Support</p>
-        <div className="flex items-center justify-center mt-2 space-x-2">
-          <span className="text-sm">Powered by</span>
-          <a href="https://www.polytope.com/" className="font-bold text-transparent bg-clip-text hover:opacity-90 transition-opacity" style={{ background: "linear-gradient(to right, #ffa683, #ff76c2)", WebkitBackgroundClip: "text" }}>
-            POLYTOPE
-          </a>
-          <span className="text-sm">and</span>
-          <a style={{ color: "#fff" }} href="https://www.opper.ai/" className="text-sm font-medium hover:underline">Opper</a>
-        </div>
-      </footer>
-    </main>
-  );
+interface Call {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  summary: string;
 }
+
+const IconPhone = () => <FaPhone />;
+const IconPhoneSlash = () => <FaPhoneSlash />;
+const IconMicrophoneSlash = () => <FaMicrophoneSlash />;
+const IconPause = () => <FaPause />;
+const IconShareSquare = () => <FaShareSquare />;
+const IconCircle = () => <FaCircle className="animate-pulse" />;
+
+const CallControls = () => (
+  <div className="flex justify-center space-x-4 p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-lg">
+    <button className="btn-control">
+      <IconPhone />
+    </button>
+    <button className="btn-control">
+      <IconPause />
+    </button>
+    <button className="btn-control">
+      <IconMicrophoneSlash />
+    </button>
+    <button className="btn-control">
+      <IconShareSquare />
+    </button>
+    <button className="btn-control text-red-500 hover:bg-red-700">
+      <IconPhoneSlash />
+    </button>
+  </div>
+);
+
+const SummaryBox = () => (
+  <div className="bg-gray-800 text-gray-200 p-4 m-4 rounded-lg shadow-md">
+    <h2 className="text-lg font-semibold mb-2">AI Chat Summary</h2>
+    <p className="text-sm opacity-80">"User asked about tax declaration deadlines and needed assistance with online form submission."</p>
+  </div>
+);
+
+const CallerView = () => (
+  <div className="flex-1 p-6 bg-gray-900 text-white rounded-lg m-4">
+    <h2 className="text-xl font-bold mb-4">Caller Information</h2>
+    <p>Name: John Doe</p>
+    <p>Issue: Tax Form Submission</p>
+  </div>
+);
+
+const Main = () => {
+  const [calls, setCalls] = useState<Call[]>([]);
+const [latestSummary, setLatestSummary] = useState<string>("");
+
+useEffect(() => {
+  const fetchCalls = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/calls");
+      const data = await res.json();
+      setCalls(data);
+      if (data.length > 0) {
+        setLatestSummary(data[0].summary); 
+      }
+    } catch (error) {
+      console.error("Error fetching calls:", error);
+    }
+  };
+
+  fetchCalls();
+}, []);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-950 text-white font-sans">
+      <header className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-800 to-indigo-900 shadow-md">
+        <h1 className="text-2xl font-bold">Support Dashboard</h1>
+        <AgentStatus />
+        <CallTimer/>
+      </header>
+      <ToastNotification message="New call received from AI Assistant!" />
+      <CallControls />
+      <SummaryBox />
+      <CallerView />
+
+      <footer className="text-center text-gray-500 text-xs p-2 mt-auto">
+        © 2025 Customer Support System
+      </footer>
+    </div>
+  );
+};
 
 export default Main;
