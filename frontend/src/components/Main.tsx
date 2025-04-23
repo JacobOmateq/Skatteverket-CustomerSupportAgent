@@ -1,7 +1,18 @@
+import { useEffect, useState } from 'react';
 import ChatTranscript from './ChatTranscript';
 import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaPause, FaShareSquare, FaCircle } from 'react-icons/fa';
 import ToastNotification from './ToastNotification';
-import AgentStatus from './AgentStatus'
+import AgentStatus from './AgentStatus';
+import SideBar from './SideBar';
+import CallTimer from './CallTimer';
+
+interface Call {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  summary: string;
+}
+
 const IconPhone = () => <FaPhone />;
 const IconPhoneSlash = () => <FaPhoneSlash />;
 const IconMicrophoneSlash = () => <FaMicrophoneSlash />;
@@ -45,16 +56,36 @@ const CallerView = () => (
 );
 
 const Main = () => {
+  const [calls, setCalls] = useState<Call[]>([]);
+const [latestSummary, setLatestSummary] = useState<string>("");
+
+useEffect(() => {
+  const fetchCalls = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/calls");
+      const data = await res.json();
+      setCalls(data);
+      if (data.length > 0) {
+        setLatestSummary(data[0].summary); 
+      }
+    } catch (error) {
+      console.error("Error fetching calls:", error);
+    }
+  };
+
+  fetchCalls();
+}, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-white font-sans">
       <header className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-800 to-indigo-900 shadow-md">
         <h1 className="text-2xl font-bold">Support Dashboard</h1>
         <AgentStatus />
+        <CallTimer/>
       </header>
       <ToastNotification message="New call received from AI Assistant!" />
       <CallControls />
       <SummaryBox />
-      <ChatTranscript />
       <CallerView />
 
       <footer className="text-center text-gray-500 text-xs p-2 mt-auto">
@@ -65,8 +96,3 @@ const Main = () => {
 };
 
 export default Main;
-
-// Tailwind Custom Button Style (add to your global CSS or use className)
-// .btn-control {
-//   @apply p-3 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-300 text-white text-xl;
-// }
