@@ -1,12 +1,7 @@
 import ChatTranscript from './ChatTranscript';
 import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaPause, FaShareSquare, FaCircle } from 'react-icons/fa';
 import ToastNotification from './ToastNotification';
-const AgentStatus = () => (
-  <div className="flex items-center space-x-2 text-green-400">
-    <FaCircle className="animate-pulse" />
-    <span>Available</span>
-  </div>
-);
+import AgentStatus from './AgentStatus'
 const IconPhone = () => <FaPhone />;
 const IconPhoneSlash = () => <FaPhoneSlash />;
 const IconMicrophoneSlash = () => <FaMicrophoneSlash />;
