@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import ChatTranscript from './ChatTranscript';
 import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaPause, FaShareSquare, FaCircle } from 'react-icons/fa';
 import ToastNotification from './ToastNotification';
@@ -11,21 +12,26 @@ const IconCircle = () => <FaCircle className="animate-pulse" />;
 
 const CallControls = () => (
   <div className="flex justify-center space-x-4 p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-lg">
-    <button className="btn-control">
-      <IconPhone />
-    </button>
-    <button className="btn-control">
-      <IconPause />
-    </button>
-    <button className="btn-control">
-      <IconMicrophoneSlash />
-    </button>
-    <button className="btn-control">
-      <IconShareSquare />
-    </button>
-    <button className="btn-control text-red-500 hover:bg-red-700">
-      <IconPhoneSlash />
-    </button>
+    {!onCall ? (
+      <button className="btn-control text-green-500" onClick={onAnswer}>
+        <FaPhone />
+      </button>
+    ) : (
+      <>
+        <button className="btn-control" onClick={onToggleHold}>
+          <FaPause />
+        </button>
+        <button className={`btn-control ${isMuted ? 'text-red-500' : ''}`} onClick={onToggleMute}>
+          <FaMicrophoneSlash />
+        </button>
+        <button className="btn-control">
+          <FaShareSquare />
+        </button>
+        <button className="btn-control text-red-500 hover:bg-red-700" onClick={onHangup}>
+          <FaPhoneSlash />
+        </button>
+      </>
+    )}
   </div>
 );
 
@@ -45,14 +51,100 @@ const CallerView = () => (
 );
 
 const Main = () => {
+  const [device, setDevice] = useState<Device | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [onCall, setOnCall] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [activeCall, setActiveCall] = useState<any>(null);
+  const [showNotification, setShowNotification] = useState(false);
+
+  const setupDevice = useCallback(async () => {
+    try {
+      const response = await fetch('https://twilio-288412564780.europe-north2.run.app/twilio/token?identity=agent');
+      const data = await response.json();
+      
+      const newDevice = new Device(data.token);
+      
+      newDevice.on('ready', () => setIsReady(true));
+      newDevice.on('error', (error) => console.error('Twilio device error:', error));
+      newDevice.on('incoming', (call) => {
+        setActiveCall(call);
+        setShowNotification(true);
+      });
+
+      await newDevice.register();
+      setDevice(newDevice);
+    } catch (error) {
+      console.error('Error setting up Twilio device:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    setupDevice();
+    return () => {
+      if (device) {
+        device.destroy();
+      }
+    };
+  }, [setupDevice]);
+
+  const handleAnswer = useCallback(() => {
+    if (activeCall) {
+      activeCall.accept();
+      setOnCall(true);
+      setShowNotification(false);
+    }
+  }, [activeCall]);
+
+  const handleHangup = useCallback(() => {
+    if (activeCall) {
+      activeCall.disconnect();
+      setOnCall(false);
+      setActiveCall(null);
+    }
+  }, [activeCall]);
+
+  const handleToggleMute = useCallback(() => {
+    if (activeCall) {
+      if (isMuted) {
+        activeCall.mute(false);
+      } else {
+        activeCall.mute(true);
+      }
+      setIsMuted(!isMuted);
+    }
+  }, [activeCall, isMuted]);
+
+  const handleToggleHold = useCallback(() => {
+    if (activeCall) {
+      if (activeCall.isOnHold()) {
+        activeCall.unhold();
+      } else {
+        activeCall.hold();
+      }
+    }
+  }, [activeCall]);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-950 text-white font-sans">
       <header className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-800 to-indigo-900 shadow-md">
         <h1 className="text-2xl font-bold">Support Dashboard</h1>
-        <AgentStatus />
+        <AgentStatus isReady={isReady} />
       </header>
-      <ToastNotification message="New call received from AI Assistant!" />
-      <CallControls />
+      
+      {showNotification && (
+        <ToastNotification message="New call received from AI Assistant!" />
+      )}
+      
+      <CallControls
+        onCall={onCall}
+        isMuted={isMuted}
+        onAnswer={handleAnswer}
+        onHangup={handleHangup}
+        onToggleMute={handleToggleMute}
+        onToggleHold={handleToggleHold}
+      />
+      
       <SummaryBox />
       <ChatTranscript />
       <CallerView />
