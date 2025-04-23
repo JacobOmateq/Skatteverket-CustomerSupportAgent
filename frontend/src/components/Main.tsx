@@ -1,10 +1,28 @@
 import { useEffect, useState } from 'react';
-import ChatTranscript from './ChatTranscript';
 import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaPause, FaShareSquare, FaCircle } from 'react-icons/fa';
 import ToastNotification from './ToastNotification';
 import AgentStatus from './AgentStatus';
-import SideBar from './SideBar';
-import CallTimer from './CallTimer';
+
+const CallList = ({ calls }: { calls: Call[] }) => {
+  if (!Array.isArray(calls)) {
+    return <div className="p-4 text-red-400">No call data available.</div>;
+  }
+
+  return (
+    <div className="bg-gray-900 text-white p-4 m-4 rounded-lg shadow-inner">
+      <h2 className="text-md font-semibold mb-3 text-purple-300">📋 Call History</h2>
+      <ul className="space-y-1 text-sm">
+        {calls.map((call) => (
+          <li key={call.id} className="border-b border-gray-700 pb-2">
+            {call.summary.length > 30 ? call.summary.slice(0, 30) + "..." : call.summary}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+
 
 interface Call {
   id: string;
@@ -40,12 +58,13 @@ const CallControls = () => (
   </div>
 );
 
-const SummaryBox = () => (
+const SummaryBox = ({ summary }: { summary: string }) => (
   <div className="bg-gray-800 text-gray-200 p-4 m-4 rounded-lg shadow-md">
     <h2 className="text-lg font-semibold mb-2">AI Chat Summary</h2>
-    <p className="text-sm opacity-80">"User asked about tax declaration deadlines and needed assistance with online form submission."</p>
+    <p className="text-sm opacity-80">{summary || "No summary available."}</p>
   </div>
 );
+
 
 const CallerView = () => (
   <div className="flex-1 p-6 bg-gray-900 text-white rounded-lg m-4">
@@ -56,7 +75,7 @@ const CallerView = () => (
 );
 
 const Main = () => {
-  const [calls, setCalls] = useState<Call[]>([]);
+const [calls, setCalls] = useState<Call[]>([]);
 const [latestSummary, setLatestSummary] = useState<string>("");
 
 useEffect(() => {
@@ -64,14 +83,22 @@ useEffect(() => {
     try {
       const res = await fetch("http://localhost:3001/calls");
       const data = await res.json();
-      setCalls(data);
-      if (data.length > 0) {
-        setLatestSummary(data[0].summary); 
+  
+      if (Array.isArray(data)) {
+        setCalls(data);
+        if (data.length > 0) {
+          setLatestSummary(data[0].summary);
+        }
+      } else {
+        console.error("API response is not an array:", data);
+        setCalls([]);
       }
     } catch (error) {
       console.error("Error fetching calls:", error);
+      setCalls([]);
     }
   };
+  
 
   fetchCalls();
 }, []);
@@ -81,11 +108,11 @@ useEffect(() => {
       <header className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-800 to-indigo-900 shadow-md">
         <h1 className="text-2xl font-bold">Support Dashboard</h1>
         <AgentStatus />
-        <CallTimer/>
-      </header>
+              </header>
       <ToastNotification message="New call received from AI Assistant!" />
       <CallControls />
-      <SummaryBox />
+      <SummaryBox summary={latestSummary} />
+      <CallList calls={calls} />
       <CallerView />
 
       <footer className="text-center text-gray-500 text-xs p-2 mt-auto">
