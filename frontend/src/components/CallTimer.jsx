@@ -8,7 +8,7 @@ const CallTimer = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const formatTime = (secs: number) => `${Math.floor(secs / 60)}:${secs % 60 < 10 ? '0' : ''}${secs % 60}`;
+  const formatTime = (secs) => `${Math.floor(secs / 60)}:${secs % 60 < 10 ? '0' : ''}${secs % 60}`;
 
   return (
     <div className="text-sm text-gray-400 mt-2">

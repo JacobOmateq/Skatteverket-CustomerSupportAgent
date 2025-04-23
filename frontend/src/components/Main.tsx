@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
-import ChatTranscript from './ChatTranscript';
 import { FaPhone, FaPhoneSlash, FaMicrophoneSlash, FaPause, FaShareSquare, FaCircle } from 'react-icons/fa';
 import ToastNotification from './ToastNotification';
 import AgentStatus from './AgentStatus';
-import SideBar from './SideBar';
-import CallTimer from './CallTimer';
 
 const CallList = ({ calls }: { calls: Call[] }) => {
   if (!Array.isArray(calls)) {
@@ -111,8 +108,7 @@ useEffect(() => {
       <header className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-800 to-indigo-900 shadow-md">
         <h1 className="text-2xl font-bold">Support Dashboard</h1>
         <AgentStatus />
-        <CallTimer/>
-      </header>
+              </header>
       <ToastNotification message="New call received from AI Assistant!" />
       <CallControls />
       <SummaryBox summary={latestSummary} />
