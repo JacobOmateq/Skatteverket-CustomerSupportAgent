@@ -19,7 +19,8 @@ class CouchbaseChatClient:
         bucket_name: str = None,
         scope: str = "_default",
         chats_coll: str = "chats",
-        messages_coll: str = "chat_messages"
+        messages_coll: str = "chat_messages",
+        calls_coll: str = "calls"
     ):
         self.url = url
         self.username = username
@@ -28,11 +29,13 @@ class CouchbaseChatClient:
         self.scope_name = scope
         self.chats_coll = chats_coll
         self.messages_coll = messages_coll
+        self.calls_coll = calls_coll
         self.cluster = None
         self.bucket = None
         self.scope = None
         self.chats = None
         self.messages = None
+        self.calls = None
         self._is_query_service_ready = False
 
     def connect(self) -> None:
@@ -63,7 +66,7 @@ class CouchbaseChatClient:
             bucket = self.cluster.bucket(self.bucket_name)
             collection_manager = bucket.collections()
 
-            for coll in [self.messages_coll, self.chats_coll]:
+            for coll in [self.messages_coll, self.chats_coll, self.calls_coll]:
                 try:
                     collection_manager.create_collection(self.scope_name, coll)
                     logger.info(f"Created collection: {coll}")
@@ -77,6 +80,7 @@ class CouchbaseChatClient:
 
             self.chats = self.scope.collection(self.chats_coll)
             self.messages = self.scope.collection(self.messages_coll)
+            self.calls = self.scope.collection(self.calls_coll)
 
             logger.info("Collections initialized successfully")
         except Exception as e:
@@ -128,6 +132,59 @@ class CouchbaseChatClient:
 
         # If we've exhausted all retries
         raise Exception(f"Couchbase query service not available after {max_retries} attempts")
+
+    def create_call(self, summary: str) -> None:
+        """
+        Create a new call session.
+        Args:
+            call_id: The UUID of the call session
+            summary: Summary of the call session
+        """
+
+        if not self.calls:
+            self.init()
+
+        now = datetime.utcnow().isoformat()
+        call_id = str(uuid.uuid4())
+        doc = {
+            "id": call_id,
+            "created_at": now,
+            "updated_at": now,
+            "summary": summary
+        }
+
+        try:
+            self.calls.upsert(call_id, doc)
+            logger.info(f"Created call session with ID: {call_id}")
+        except Exception:
+            logger.exception("Failed to create call")
+            raise
+
+    def get_calls(self) -> List[Dict[str, Any]]:
+        """
+        Get all call sessions.
+
+        Returns:
+            List of call sessions
+        """
+        if not self.calls:
+            self.init()
+
+        # Make sure the query service is available
+        self.await_up()
+
+        try:
+            query = f"""
+            SELECT c.*
+            FROM {self.bucket_name}.{self.scope_name}.{self.calls_coll} c
+            ORDER BY c.created_at DESC
+            """
+
+            result = self.cluster.query(query)
+            return [row for row in result]
+        except Exception:
+            logger.exception("Failed to get calls.")
+            raise
 
     def create_chat(self, metadata: Dict[str, Any] = None) -> str:
         """

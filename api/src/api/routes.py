@@ -149,6 +149,12 @@ class ChatHistory(BaseModel):
     chat_id: str
     messages: list[Message]
 
+class Call(BaseModel):
+    id: str
+    created_at: str
+    updated_at: str
+    summary: str
+
 ## Knowledge Base ##
 class KnowledgeItem(BaseModel):
     id: str
@@ -304,6 +310,98 @@ def bake_response(opper: Opper, messages, analysis=None):
 
 #### Routes ####
 
+@router.post("/ticket")
+async def ticket_webhook(
+    db: DbHandle,
+    request: Request,
+):
+    """Handle webhook callbacks from ticketing system."""
+    # Get the webhook secret from app state or config
+    # secret = request.app.state.webhook_secret
+    # For now, using a hardcoded secret for demonstration purposes
+    payload = await request.body()
+
+    # log payload
+    logger.info(f"Received webhook: {payload.decode('utf-8')}")
+
+    try:
+        db.create_call(
+            summary=payload.decode('utf-8'),
+            )
+    except Exception as e:
+        logger.error(f"Failed to create call: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create call")
+    
+
+
+
+@router.post("/webhook", response_model=MessageResponse)
+async def elevenlabs_webhook(
+    db: DbHandle,
+    request: Request,
+):
+    """Handle webhook callbacks from ElevenLabs."""
+    # Get the webhook secret from app state or config
+    
+    payload = await request.body()
+
+    # log the request
+    logger.info(f"Received webhook: {payload.decode('utf-8')}")
+    # Received webhook: {"type": "post_call_transcription", "event_
+    # timestamp": 1745410598, "data": {"agent_id": "lAeFn45DopHyHBc3FKgf", "conversation_id": "D5pFFULGf0y6CEYzeyO
+    # 4", "status": "done", "transcript": [{"role": "agent", "message": "Hej, jag heter Alexis fr\u00e5n Skattever
+    # ket support. Hur kan jag hj\u00e4lpa dig...", "tool_calls": [], "tool_results": [], "feedback": null, "llm_o
+    # verride": null, "time_in_call_secs": 0, "conversation_turn_metrics": null, "rag_retrieval_info": null}, {"ro
+    # le": "user", "message": "Ja, jag t\u00e4nkte att Jessica h\u00e4nsyt. Alla, alla, alla. Tjass, tjass, tjass,
+    #  tjass.", "tool_calls": [], "tool_results": [], "feedback": null, "llm_override": null, "time_in_call_secs":
+    #  3, "conversation_turn_metrics": null, "rag_retrieval_info": null}, {"role": "agent", "message": "...", "too
+    # l_calls": [], "tool_results": [], "feedback": null, "llm_override": null, "time_in_call_secs": 12, "conversa
+    # tion_turn_metrics": {"metrics": {"convai_llm_service_ttf_sentence": {"elapsed_time": 0.4588057119399309}, "c
+    # onvai_llm_service_ttfb": {"elapsed_time": 0.33562604803591967}}}, "rag_retrieval_info": null}], "metadata": 
+    # {"start_time_unix_secs": 1745410584, "accepted_time_unix_secs": 1745410585, "call_duration_secs": 13, "cost"
+    # : 70, "deletion_settings": {"deletion_time_unix_secs": null, "deleted_logs_at_time_unix_secs": null, "delete
+    # d_audio_at_time_unix_secs": null, "deleted_transcript_at_time_unix_secs": null, "delete_transcript_and_pii":
+    #  false, "delete_audio": false}, "feedback": {"overall_score": null, "likes": 0, "dislikes": 0}, "authorizati
+    # on_method": "authorization_header", "charging": {"dev_discount": true, "tier": "free"}, "phone_call": null, 
+    # "termination_reason": "", "error": null, "main_language": "sv", "rag_usage": null}, "analysis": {"evaluation
+    # _criteria_results": {}, "data_collection_results": {}, "call_successful": "success", "transcript_summary": "
+    # The user contacted Skatteverket support and mentioned the name \"Jessica\" but the rest of the speech was un
+    # intelligible. The agent was unable to assist due to the unclear request.\n"}, "conversation_initiation_clien
+    # t_data": {"conversation_config_override": {"agent": {"prompt": null, "first_message": null, "language": "sv"
+    # }, "tts": {"voice_id": null}}, "custom_llm_extra_body": {}, "dynamic_variables": {"system__agent_id": "lAeFn
+    # 45DopHyHBc3FKgf", "system__conversation_id": "D5pFFULGf0y6CEYzeyO4", "system__caller_id": null, "system__cal
+    # led_number": null, "system__call_duration_secs": 12, "system__time_utc": "2025-04-23T12:16:37.329415+00:00",
+    #  "system__call_sid": null}}}}
+
+    # Persist the call data to the database
+    try:
+        db.create_call(
+            summary=payload.decode('utf-8'),
+            )
+    except Exception as e:
+        logger.error(f"Failed to create call: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create call")
+    
+    # return 200
+    return MessageResponse(message="Webhook received successfully")
+
+@router.get("/calls", response_model=list[Call])
+async def get_calls(
+    db: DbHandle,
+    request: Request,
+) -> list[Call]:
+    """Get all calls."""
+    # Get the calls from the database
+    try:
+        calls = db.get_calls()
+    except Exception as e:
+        logger.error(f"Failed to get calls: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get calls")
+
+    # return 200
+    return calls
+
+
 @router.get("", response_model=MessageResponse)
 async def hello() -> MessageResponse:
     return MessageResponse(message="Hello from the Customer Support Chat API!")
@@ -445,4 +543,4 @@ async def delete_chat(
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete chat")
 
-    return MessageResponse(message=f"Chat {chat_id} deleted successfully")ß
+    return MessageResponse(message=f"Chat {chat_id} deleted successfully")
